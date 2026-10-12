@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PreMeet — Business Plan, Deployment &amp; Go-to-Market</title>
+<style>
+  :root{
+    --accent:#4338CA;
+    --accent-dark:#A5B4FC;
+    --accent-soft:#EEF0FC;
+    --ink:#16181A;
+    --ink-2:#4A5054;
+    --ink-3:#7A8287;
+    --line:#E1E4E5;
+    --paper:#FAFAF9;
+    --night:#101314;
+    --hud:#7A8287;
+    --warn:#B4442E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#2B2F31}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    color:var(--ink);
+  }
+  #deck{position:fixed;inset:0}
+  .slide{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--paper);
+    opacity:0;visibility:hidden;
+    transition:opacity .22s ease;
+  }
+  .slide.active{opacity:1;visibility:visible}
+  .slide.dark{background:var(--night)}
+
+  .stage{
+    --u:min(1vw,1.7778vh);
+    width:min(100vw,177.78vh);
+    height:min(56.25vw,100vh);
+    padding:calc(var(--u)*5) calc(var(--u)*6.6) calc(var(--u)*4.4);
+    display:flex;flex-direction:column;
+    position:relative;
+  }
+
+  .marker{
+    font:600 max(11px,calc(var(--u)*1.02))/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:.22em;color:var(--accent);
+    display:block;margin-bottom:calc(var(--u)*1.6);
+  }
+  .dark .marker{color:var(--accent-dark)}
+  h2{
+    font-size:calc(var(--u)*3.35);line-height:1.07;letter-spacing:-.022em;font-weight:600;
+    max-width:calc(var(--u)*82);
+  }
+  .dark h2,.dark h1{color:#F4F5F5}
+  .rule{display:block;width:calc(var(--u)*6);height:calc(var(--u)*.22);background:var(--accent);margin-top:calc(var(--u)*1.4)}
+  .dark .rule{background:var(--accent-dark)}
+
+  .body{flex:1;display:flex;align-items:center;margin-top:calc(var(--u)*1.8);min-height:0}
+  p.lead{font-size:max(16px,calc(var(--u)*1.46));line-height:1.48;color:var(--ink-2);max-width:calc(var(--u)*52)}
+  .dark p.lead{color:#A9B1B5}
+  .cap{font-size:max(12px,calc(var(--u)*1.02));line-height:1.45;color:var(--ink-3);letter-spacing:.01em}
+  .kicker{
+    font:600 max(11px,calc(var(--u)*1.02))/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:.22em;color:var(--ink-3);text-transform:uppercase;
+  }
+  .split{display:flex;gap:calc(var(--u)*4.2);width:100%;align-items:center}
+  .col-a{flex:0 0 36%}
+  .col-b{flex:1;min-width:0}
+  .split-top{align-items:flex-start}
+
+  h1{font-size:calc(var(--u)*5.9);line-height:1.03;letter-spacing:-.03em;font-weight:600}
+  .sub{font-size:calc(var(--u)*1.95);color:#A9B1B5;margin-top:calc(var(--u)*1.5);font-weight:400;max-width:calc(var(--u)*62)}
+  .tfoot{display:flex;gap:calc(var(--u)*3.2);align-items:baseline;color:#6E7679;
+    font:600 max(11px,calc(var(--u)*1.02))/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.18em;
+    text-transform:uppercase}
+
+  .bul{list-style:none;display:flex;flex-direction:column;gap:calc(var(--u)*1.2)}
+  .bul li{font-size:max(13px,calc(var(--u)*1.32));line-height:1.42;color:var(--ink-2);
+    padding-left:calc(var(--u)*1.9);position:relative}
+  .bul li::before{content:"";position:absolute;left:0;top:calc(var(--u)*.62);
+    width:calc(var(--u)*.72);height:calc(var(--u)*.72);background:var(--accent)}
+  .bul li b{color:var(--ink);font-weight:600}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1.3) calc(var(--u)*3.6);width:100%}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(var(--u)*2.2);width:100%;
+    border-top:1px solid var(--line);padding-top:calc(var(--u)*1.5);margin-top:calc(var(--u)*2)}
+  .stats .s{border-left:2px solid var(--accent);padding-left:calc(var(--u)*1.2)}
+  .stats .v{font-size:max(19px,calc(var(--u)*2.2));font-weight:600;letter-spacing:-.02em;line-height:1}
+  .stats .l{font:600 max(10px,calc(var(--u)*.94))/1.3 ui-monospace,Menlo,monospace;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-3);margin-top:calc(var(--u)*.7)}
+
+  /* tables */
+  .tbl{width:100%;display:grid;row-gap:0}
+  .tbl > div{padding:calc(var(--u)*1.15) calc(var(--u)*1.4) calc(var(--u)*1.15) 0;border-top:1px solid var(--line);
+    font-size:max(12px,calc(var(--u)*1.16));line-height:1.3;color:var(--ink-2)}
+  .tbl .hd{border-top:none;border-bottom:1px solid var(--ink);color:var(--ink-3);
+    font:600 max(10px,calc(var(--u)*.94))/1 ui-monospace,Menlo,monospace;letter-spacing:.15em;text-transform:uppercase;
+    padding-bottom:calc(var(--u)*.95)}
+  .tbl .nm{color:var(--ink);font-weight:600}
+  .tbl .accent{color:var(--accent);font-weight:600}
+  .tbl .warn{color:var(--warn);font-weight:600}
+  .tbl .num{font-family:ui-monospace,Menlo,monospace}
+  .tbl .rt{text-align:right;padding-right:0}
+  .c5{grid-template-columns:1.9fr 1fr .7fr .8fr .8fr}
+  .c6{grid-template-columns:1.5fr .7fr .55fr .95fr .8fr .85fr}
+  .c4{grid-template-columns:1.5fr .8fr .8fr .8fr}
+  .c3{grid-template-columns:1.7fr 1fr 1fr}
+  .cx{grid-template-columns:1.05fr .95fr 1.5fr}
+
+  .note{margin-top:calc(var(--u)*1.4);border-left:2px solid var(--accent);padding-left:calc(var(--u)*1.3);
+    font-size:max(12px,calc(var(--u)*1.16));line-height:1.45;color:var(--ink-2);max-width:calc(var(--u)*76)}
+  .note b{color:var(--ink)}
+  .note.warn{border-left-color:var(--warn)}
+
+  /* steps */
+  .steps{display:flex;flex-direction:column;gap:calc(var(--u)*1.2)}
+  .step{display:grid;grid-template-columns:calc(var(--u)*3) 1fr;gap:calc(var(--u)*1.4);align-items:baseline}
+  .step .idx{font:600 max(12px,calc(var(--u)*1.28))/1.1 ui-monospace,Menlo,monospace;letter-spacing:.12em;color:var(--accent)}
+  .step .t{font-size:max(13px,calc(var(--u)*1.3));line-height:1.42;color:var(--ink-2)}
+  .step .t b{color:var(--ink);font-weight:600}
+
+  .close-note{margin-top:calc(var(--u)*2.1);border-top:1px solid rgba(255,255,255,.16);padding-top:calc(var(--u)*1.5);
+    font-size:max(13px,calc(var(--u)*1.32));line-height:1.5;color:#A9B1B5;max-width:calc(var(--u)*74)}
+  .close-note b{color:#F4F5F5;font-weight:600}
+
+  .zone{position:absolute;top:0;bottom:0;width:13%;z-index:6;cursor:pointer}
+  .zone.l{left:0}.zone.r{right:0}
+  .hud{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none}
+  .bar{height:2px;background:rgba(122,130,135,.22)}
+  .fill{height:2px;width:0;background:var(--accent);transition:width .22s ease}
+  body.on-dark .fill{background:var(--accent-dark)}
+  .hudrow{display:flex;align-items:center;justify-content:space-between;
+    padding:10px max(16px,2.2vw);pointer-events:none}
+  .count,.hint{font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.2em;color:var(--hud)}
+  .count b{color:var(--ink)}
+  body.on-dark .count b{color:#E9EBEB}
+  .nav{display:flex;gap:6px;pointer-events:auto}
+  .nav button{
+    width:30px;height:26px;border:1px solid var(--line);background:transparent;color:var(--hud);
+    font-size:13px;line-height:1;cursor:pointer;border-radius:2px
+  }
+  body.on-dark .nav button{border-color:#2B3133}
+  .nav button:hover{color:var(--accent);border-color:var(--accent)}
+  body.on-dark .nav button:hover{color:var(--accent-dark);border-color:var(--accent-dark)}
+
+  #notes{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;background:#16191B;color:#D6DADC;
+    padding:22px max(18px,2.4vw) 26px;display:none;max-height:46vh;overflow:auto;
+    border-top:2px solid var(--accent-dark)
+  }
+  #notes.on{display:block}
+  #notes h4{font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.22em;color:var(--accent-dark);
+    text-transform:uppercase;margin-bottom:12px}
+  #notes ul{margin:0 0 14px 16px}
+  #notes li{font-size:15px;line-height:1.5;margin-bottom:6px;color:#D6DADC}
+  #notes .q li{color:#9AA3A7}
+  #notes .lbl{font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;color:#7F888C;text-transform:uppercase;display:block;margin-bottom:8px}
+
+  @media screen and (max-width:820px){
+    html,body{overflow:auto;background:#2B2F31}
+    #deck{position:static}
+    .slide{position:relative;inset:auto;opacity:1;visibility:visible;min-height:100vh;padding:24px 0}
+    .stage{--u:1.9vw;width:100%;height:auto;padding:24px}
+    .split{flex-direction:column}
+    .cols2,.stats{grid-template-columns:1fr}
+    .c3,.c4,.c5,.c6{grid-template-columns:1fr;font-size:14px}
+    .tbl .hd{display:none}
+    .hud{position:fixed}
+  }
+
+  @page{size:10in 5.625in;margin:0}
+  @media print{
+    html,body{height:auto;overflow:visible;background:#fff}
+    #deck{position:static}
+    .slide{position:relative;inset:auto;opacity:1!important;visibility:visible!important;
+      width:10in;height:5.625in;page-break-after:always;break-after:page;overflow:hidden}
+    .slide:last-of-type{page-break-after:auto;break-after:auto}
+    .stage{--u:.1in;width:10in;height:5.625in}
+    .hud,#notes,.zone{display:none!important}
+  }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- 01 TITLE -->
+  <section class="slide dark active">
+    <div class="stage">
+      <span class="marker">BUSINESS PLAN · 2026</span>
+      <div class="body" style="flex-direction:column;align-items:flex-start;justify-content:center">
+        <h1>PreMeet</h1>
+        <p class="sub">Brief yourself before the meeting. In two minutes, not two hours.</p>
+        <span class="rule" style="margin-top:calc(var(--u)*2.8)"></span>
+        <p class="lead" style="margin-top:calc(var(--u)*2.2);max-width:calc(var(--u)*60)">
+          A website that turns a name into a meeting-ready briefing deck — research area, funded work,
+          photo, and ranked collaboration talking points. Business plan, deployment, pricing, and
+          go-to-market.</p>
+      </div>
+      <div class="tfoot"><span>Wedge: university scholars</span><span>Expansion: adjacent verticals</span><span>Unit economics: §5</span></div>
+    </div>
+  </section>
+
+  <!-- 02 PROBLEM -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">THE PROBLEM · 02</span>
+      <h2>The cold meeting burns the scarcest resource in the university: expert time.</h2>
+      <span class="rule"></span>
+      <div class="body">
+        <div class="split split-top">
+          <div class="col-a">
+            <p class="lead">You have 30 minutes with a visiting scholar, a prospective co-author, or a
+              program officer — and no time to read their work. So the meeting starts with ten minutes of
+              catch-up, or skips the substance entirely.</p>
+            <p class="cap" style="margin-top:calc(var(--u)*1.8)">The cost is real, and absent from any
+              budget line.</p>
+          </div>
+          <div class="col-b">
+            <ul class="bul">
+              <li>A faculty consulting hour benchmarks at <b>$85–$360</b>; a research assistant at <b>$22–$35/hr</b>.</li>
+              <li>A competent pre-meeting dossier takes an RA <b>2–4 hours</b> — <b>$70–$1,400</b> of staff time, and a day's lead time.</li>
+              <li>The alternative today is a <b>DIY LLM prompt</b>: 30–60 minutes of effort, no sources, inconsistent, no grant data.</li>
+              <li>The meeting load is <b>rising</b> — grant-driven and interdisciplinary work means more cross-field meetings every year.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 PRODUCT -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">THE PRODUCT · 03</span>
+      <h2>A name in. A brief you can read on the walk over.</h2>
+      <span class="rule"></span>
+      <div class="body">
+        <div class="split split-top">
+          <div class="col-b">
+            <div class="steps">
+              <div class="step"><span class="idx">IN</span><span class="t"><b>A name</b> — plus optional institution, URL, ORCID, or a pasted agenda.</span></div>
+              <div class="step"><span class="idx">OUT</span><span class="t"><b>A 9–13 slide brief</b> — profile &amp; headshot, research threads, funded portfolio, recognition, and <b>ranked collaboration talking points</b> with a recommended opener.</span></div>
+              <div class="step"><span class="idx">OUT</span><span class="t"><b>PDF + share link</b>, with a <b>source link on every claim</b> and a "verify before you rely on it" banner.</span></div>
+              <div class="step"><span class="idx">NOT</span><span class="t">Not a CRM, not a meeting-notes tool, not a people-search database. It is the <b>pre-meeting synthesis artifact</b>.</span></div>
+            </div>
+          </div>
+          <div class="col-a">
+            <p class="lead">The whole value is <em>saved time</em> and a <em>better meeting</em> — an artifact,
+              not another tab of raw data.</p>
+            <p class="cap" style="margin-top:calc(var(--u)*1.8)">MVP ships: name → brief, sources, PDF export,
+              and a cache of every person generated.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 WHY NOW / MARKET -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">WHY NOW &amp; THE WEDGE · 04</span>
+      <h2>The compute flipped, the data is free, and nobody owns the niche.</h2>
+      <span class="rule"></span>
+      <div class="body" style="flex-direction:column;align-items:stretch;justify-content:center">
+        <div class="cols2">
+          <ul class="bul">
+            <li><b>Compute cost collapse.</b> Synthesis now runs for cents on mid-tier models ($2/$10 per M tokens) and returns good prose. The economics flipped.</li>
+            <li><b>Open structured data is free.</b> OpenAlex, ORCID, Crossref, Semantic Scholar, NIH RePORTER, NSF Awards API — identity, publications, and <b>grants</b> at no cost.</li>
+          </ul>
+          <ul class="bul">
+            <li><b>The hard part moved.</b> Finding data is solved; <em>synthesising it legibly</em> is the job. That is exactly what a model does well now.</li>
+            <li><b>No incumbent.</b> Sales-intel tools serve B2B sales; academic databases serve raw data; meeting tools record <em>after</em>. The pre-meeting person-brief for academics is open.</li>
+          </ul>
+        </div>
+        <div class="stats">
+          <div class="s"><div class="v">1.5M+</div><div class="l">US faculty (beachhead)</div></div>
+          <div class="s"><div class="v">$85–360</div><div class="l">Faculty consulting hr</div></div>
+          <div class="s"><div class="v">2–4 hrs</div><div class="l">Today's RA cost/dossier</div></div>
+          <div class="s"><div class="v">&lt; 2 min</div><div class="l">PreMeet time to brief</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 UNIT ECONOMICS - COGS -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">UNIT ECONOMICS I · 05</span>
+      <h2>One brief costs 8¢ to 42¢. Synthesis is the only real lever.</h2>
+      <span class="rule"></span>
+      <div class="body" style="flex-direction:column;align-items:stretch;justify-content:center">
+        <div class="split split-top" style="align-items:center">
+          <div style="flex:0 0 46%">
+            <div class="tbl c4">
+              <div class="hd">Cost component</div><div class="hd rt">Economy</div><div class="hd rt">Standard</div><div class="hd rt">Premium</div>
+              <div>Web search (6–10 queries)</div><div class="num rt">$0.006</div><div class="num rt">$0.006</div><div class="num rt">$0.010</div>
+              <div>Page fetch / extract</div><div class="num rt">$0.048</div><div class="num rt">$0.048</div><div class="num rt">$0.080</div>
+              <div>LLM extraction (cheap)</div><div class="num rt">$0.010</div><div class="num rt">$0.010</div><div class="num rt">$0.015</div>
+              <div class="nm">LLM synthesis</div><div class="num rt accent">$0.005</div><div class="num rt accent">$0.084</div><div class="num rt accent">$0.300</div>
+              <div>Render + storage</div><div class="num rt">$0.006</div><div class="num rt">$0.006</div><div class="num rt">$0.010</div>
+              <div class="nm">COGS / brief</div><div class="num rt accent">≈$0.08</div><div class="num rt accent">≈$0.15</div><div class="num rt accent">≈$0.42</div>
+            </div>
+          </div>
+          <div class="col-b">
+            <svg viewBox="0 0 1000 330" role="img" aria-label="Stacked cost bars per brief: economy $0.08, standard $0.15, premium $0.42, with synthesis dominating">
+              <!-- rows -->
+              <text x="0" y="46" font-size="22" fill="#16181A" font-weight="600">Economy</text>
+              <rect x="150" y="26" width="161" height="30" fill="#C9CDDA"/>
+              <rect x="300" y="26" width="11" height="30" fill="#4338CA"/>
+              <text x="330" y="47" font-size="20" fill="#4A5054">$0.075</text>
+
+              <text x="0" y="146" font-size="22" fill="#16181A" font-weight="600">Standard</text>
+              <rect x="150" y="126" width="150" height="30" fill="#C9CDDA"/>
+              <rect x="300" y="126" width="180" height="30" fill="#4338CA"/>
+              <text x="500" y="147" font-size="20" fill="#4A5054">$0.154</text>
+
+              <text x="0" y="246" font-size="22" fill="#16181A" font-weight="600">Premium</text>
+              <rect x="150" y="226" width="150" height="30" fill="#C9CDDA"/>
+              <rect x="300" y="226" width="643" height="30" fill="#4338CA"/>
+              <text x="963" y="247" font-size="20" fill="#4A5054" text-anchor="end" dx="-70">$0.415</text>
+              <!-- legend -->
+              <rect x="150" y="300" width="16" height="16" fill="#4338CA"/>
+              <text x="176" y="314" font-size="18" fill="#7A8287">Synthesis (the lever)</text>
+              <rect x="470" y="300" width="16" height="16" fill="#C9CDDA"/>
+              <text x="496" y="314" font-size="18" fill="#7A8287">Search · fetch · extract · render</text>
+            </svg>
+            <p class="note">Flagship synthesis costs <b>60×</b> economy synthesis on the same pipeline.
+              Everything else is noise — optimise it once, then expose synthesis tier as the quality dial.</p>
+          </div>
+        </div>
+        <p class="cap" style="margin-top:calc(var(--u)*1.2)">Rates: Opus-5-class $5/$25 · Sonnet-5-class $2/$10 · economy ~$0.15/$0.60 per M tokens · Serper ~$0.001/query · Tavily extract $0.008/credit · self-hosted render ~$0.005/doc. Blended (70/20/10) ≈ <b>$0.16/brief</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 THE TRADE-OFF -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">UNIT ECONOMICS II · 06</span>
+      <h2>Pricing is not cost recovery. It is three other trade-offs.</h2>
+      <span class="rule"></span>
+      <div class="body" style="flex-direction:column;align-items:stretch;justify-content:center">
+        <p class="lead" style="max-width:calc(var(--u)*80)">Because COGS is 8¢–42¢, any sane price clears cost
+          by a wide margin. The binding constraints are payment friction, quality-vs-churn, and abuse control.</p>
+        <div class="split split-top" style="margin-top:calc(var(--u)*1.6);align-items:flex-start">
+          <div style="flex:0 0 45%">
+            <span class="kicker">A · Fee friction on micro-charges</span>
+            <div class="tbl c3" style="margin-top:calc(var(--u)*1)">
+              <div class="hd">One-off price</div><div class="hd rt">Stripe fee</div><div class="hd rt">Net</div>
+              <div>$1</div><div class="num rt warn">$0.33</div><div class="num rt warn">$0.67 (33% lost)</div>
+              <div>$3</div><div class="num rt">$0.39</div><div class="num rt">$2.61</div>
+              <div>$5</div><div class="num rt">$0.45</div><div class="num rt">$4.55</div>
+              <div>$9</div><div class="num rt accent">$0.56</div><div class="num rt">$8.44</div>
+            </div>
+            <p class="cap" style="margin-top:calc(var(--u)*1)">2.9% + $0.30. → <b>Never sell a $1–2 one-off.</b>
+              Floor ~$5; $9 is the sweet spot; small buyers go to credit packs/subscriptions.</p>
+          </div>
+          <div class="col-b">
+            <div class="cols2" style="grid-template-columns:1fr;gap:calc(var(--u)*1.6)">
+              <div>
+                <span class="kicker">B · Quality vs. churn — the real cost</span>
+                <p class="cap" style="margin-top:calc(var(--u)*.8)">A cheap brief costs little in compute and a lot in
+                  churn. <b>Spend on synthesis by default</b> (standard, 15¢); make economy the explicit "draft"
+                  option, never the silent default. Saving 10¢ against a $15 subscription is a losing trade.</p>
+              </div>
+              <div>
+                <span class="kicker">C · Abuse — unbounded cost from one actor</span>
+                <p class="cap" style="margin-top:calc(var(--u)*.8)">Small per-brief cost × uncapped usage = unlimited
+                  exposure. <b>Finite credits, per-user COGS metering, hard overages.</b> See next slide.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 UNLIMITED TRAP -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">UNIT ECONOMICS III · 07</span>
+      <h2>The "unlimited" trap: one power user destroys the cohort margin.</h2>
+      <span class="rule"></span>
+      <div class="body" style="flex-direction:column;align-items:stretch;justify-content:center">
+        <div class="tbl c4">
+          <div class="hd">Plan</div><div class="hd rt">Usage / mo</div><div class="hd rt">COGS</div><div class="hd rt">Gross margin</div>
+          <div>$19/mo "unlimited"</div><div class="num rt">20 briefs</div><div class="num rt">$3</div><div class="num rt">84%</div>
+          <div>$19/mo "unlimited"</div><div class="num rt">100 briefs</div><div class="num rt">$15</div><div class="num rt warn">21%</div>
+          <div>$19/mo "unlimited"</div><div class="num rt">500 briefs</div><div class="num rt">$75</div><div class="num rt warn">−295%</div>
+          <div class="nm">$15/mo, 20-brief cap</div><div class="num rt">20 (cap)</div><div class="num rt">$3</div><div class="num rt accent">80% (bounded)</div>
+        </div>
+        <p class="note warn">A cap does not just protect the floor — it <b>converts an unbounded
+          liability into a bounded one</b>. This single rule (no unlimited generation) is what makes the
+          whole portfolio's margin predictable. Overage is priced at a multiple of COGS ($1.50–$2.00/brief)
+          so the power user is <b>profitable per unit</b>, not subsidised.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 CACHE -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">UNIT ECONOMICS IV · 08</span>
+      <h2>The cache is the moat — and it drives acquisition to zero.</h2>
+      <span class="rule"></span>
+      <div class="body">
+        <div class="split">
+          <div class="col-b">
+            <p class="lead">Most briefs are about <em>recurring subjects</em> — famous scholars, deans, program
+              officers, frequent collaborators. The first brief about a person costs $0.15. Every later brief
+              about the same person costs <b>~$0.005</b> (re-format from the cached fact base; no re-research).</p>
+            <ul class="bul" style="margin-top:calc(var(--u)*1.6)">
+              <li>At a <b>40% cache-hit rate</b>, blended COGS falls from $0.16 to <b>~$0.10</b>.</li>
+              <li>At <b>60%</b>, it falls to <b>~$0.07</b> — a structural cost advantage a new entrant cannot copy without the corpus.</li>
+              <li>It also makes the <b>public profile pages</b> essentially free to serve — the SEO flywheel.</li>
+            </ul>
+          </div>
+          <div class="col-a">
+            <svg viewBox="0 0 420 300" role="img" aria-label="Blended COGS per brief falls as cache hit rate rises">
+              <line x1="40" y1="250" x2="400" y2="250" stroke="#D5D9DA" stroke-width="1.5"/>
+              <line x1="40" y1="30" x2="40" y2="250" stroke="#D5D9DA" stroke-width="1.5"/>
+              <text x="34" y="34" text-anchor="end" font-size="14" fill="#7A8287">$0.16</text>
+              <text x="34" y="254" text-anchor="end" font-size="14" fill="#7A8287">$0.00</text>
+              <rect x="90" y="30" width="60" height="220" fill="#4338CA"/>
+              <text x="120" y="272" text-anchor="middle" font-size="16" fill="#16181A">0%</text>
+              <text x="120" y="22" text-anchor="middle" font-size="17" fill="#16181A" font-weight="600">$0.16</text>
+              <rect x="200" y="112" width="60" height="138" fill="#4338CA"/>
+              <text x="230" y="272" text-anchor="middle" font-size="16" fill="#16181A">40%</text>
+              <text x="230" y="104" text-anchor="middle" font-size="17" fill="#16181A" font-weight="600">$0.10</text>
+              <rect x="310" y="154" width="60" height="96" fill="#4338CA"/>
+              <text x="340" y="272" text-anchor="middle" font-size="16" fill="#16181A">60%</text>
+              <text x="340" y="146" text-anchor="middle" font-size="17" fill="#16181A" font-weight="600">$0.07</text>
+              <text x="220" y="292" text-anchor="middle" font-size="14" fill="#7A8287">cache hit rate →</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 PRICING -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">PRICING · 09</span>
+      <h2>Freemium land-and-expand, with the institution as the expand.</h2>
+      <span class="rule"></span>
+      <div class="body" style="flex-direction:column;align-items:stretch;justify-content:center">
+        <div class="tbl c6">
+          <div class="hd">Plan</div><div class="hd rt">Price</div><div class="hd rt">Briefs/mo</div><div class="hd rt">Depth</div><div class="hd rt">Worst-case COGS</div><div class="hd rt">Gross margin</div>
+          <div class="nm">Free</div><div class="num rt">$0</div><div class="num rt">2</div><div class="rt">standard</div><div class="num rt">$0.30</div><div class="rt">acquisition</div>
+          <div class="nm">Pro</div><div class="num rt">$15/mo</div><div class="num rt">20</div><div class="rt">standard</div><div class="num rt">$3.00</div><div class="num rt accent">80%</div>
+          <div class="nm">Research</div><div class="num rt">$39/mo</div><div class="num rt">60</div><div class="rt">incl. premium</div><div class="num rt">$12.00</div><div class="num rt accent">69%</div>
+          <div class="nm">Department</div><div class="num rt">$199/mo</div><div class="num rt">300 pooled</div><div class="rt">mixed</div><div class="num rt">$45.00</div><div class="num rt accent">77%</div>
+          <div class="nm">One-off</div><div class="num rt">$9 each</div><div class="num rt">1</div><div class="rt">premium</div><div class="num rt">$0.42</div><div class="num rt accent">91%*</div>
+          <div class="nm">University site license</div><div class="num rt">$3k–25k/yr</div><div class="num rt">fair-use</div><div class="rt">mixed</div><div class="num rt">—</div><div class="rt">high ACV</div>
+        </div>
+        <p class="cap" style="margin-top:calc(var(--u)*1.3)">*net of Stripe. Worst-case = every brief at the tier's depth;
+          <b>typical</b> usage (5 briefs on Pro) runs ~<b>95%</b> margin. Annual = ~2 months free. The Department and
+          site-license tiers are where the business gets comfortable — high ACV, low support, and the buyer
+          (research office / VPR / library) has a budget for exactly this.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 BREAK-EVEN -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">BREAK-EVEN · 10</span>
+      <h2>~250 Pro-equivalents, or 19 Department plans.</h2>
+      <span class="rule"></span>
+      <div class="body" style="flex-direction:column;align-items:stretch;justify-content:center">
+        <div class="split split-top">
+          <div class="col-a">
+            <p class="lead">Cash fixed cost at early stage ≈ <b>$3,000/mo</b> (hosting, search/PDF subscriptions,
+              email/auth/analytics, a part-time support contractor).</p>
+            <p class="note">Contribution per Pro user ≈ $15 × 0.95 (net of Stripe) − $0.75 (typical COGS)
+              ≈ <b>$12.10/mo</b>. CAC target <b>&lt; $50</b> (organic/SEO-led) → payback &lt; 5 months.</p>
+          </div>
+          <div class="col-b">
+            <div class="tbl c3">
+              <div class="hd">Cover fixed cost with…</div><div class="hd rt">Count</div><div class="hd rt">Note</div>
+              <div class="nm">Pro subscribers</div><div class="num rt">~250</div><div class="rt">$12.10 contribution each</div>
+              <div class="nm">Department plans</div><div class="num rt">~19</div><div class="rt">≈$170 net each</div>
+              <div class="nm">University site licenses</div><div class="num rt">1–2</div><div class="rt">covers the run-rate alone</div>
+            </div>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="s"><div class="v">$12.10</div><div class="l">Contribution / Pro / mo</div></div>
+          <div class="s"><div class="v">~250</div><div class="l">Break-even Pro users</div></div>
+          <div class="s"><div class="v">&lt; $50</div><div class="l">CAC target</div></div>
+          <div class="s"><div class="v">&lt; 5 mo</div><div class="l">Payback target</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 DEPLOYMENT -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">DEPLOYMENT · 11</span>
+      <h2>Concierge first, then self-serve, then institutional.</h2>
+      <span class="rule"></span>
+      <div class="body" style="flex-direction:column;align-items:stretch;justify-content:center">
+        <div class="tbl c5">
+          <div class="hd">Phase</div><div class="hd rt">Window</div><div class="hd rt">Deliverable</div><div class="hd rt">Success gate</div><div class="hd rt">Cost controls</div>
+          <div class="nm">0 · Concierge MVP</div><div class="rt">0–2 mo</div><div class="rt">Run the pipeline manually for 20–50 faculty; charge $9–19</div><div class="rt">≥5 pay; NPS ≥40</div><div class="rt">manual</div>
+          <div class="nm">1 · Private beta</div><div class="rt">3–5 mo</div><div class="rt">Self-serve, freemium, Pro plan</div><div class="rt">100 users, 20 paying</div><div class="rt">COGS meter + kill-switch</div>
+          <div class="nm">2 · GA</div><div class="rt">6–9 mo</div><div class="rt">Public launch, Department plan, SEO pages live</div><div class="rt">300–500 paying, organic &gt;50%</div><div class="rt">model router + cache</div>
+          <div class="nm">3 · Institutional</div><div class="rt">10–12 mo</div><div class="rt">First university site license; adjacent-vertical research</div><div class="rt">1 license; $10k MRR</div><div class="rt">per-account COGS budgets</div>
+        </div>
+        <p class="cap" style="margin-top:calc(var(--u)*1.3)">
+          <b>Stack:</b> Next.js on Vercel · Postgres (Neon) · job queue (Inngest/Trigger.dev — generation is 60–150s async)
+          · Redis + Postgres cache · S3/Vercel Blob · Gotenberg/Playwright render · Stripe Billing · Resend · PostHog
+          · OpenRouter model layer. <b>Phase 0 is not optional</b> — it validates willingness-to-pay and seeds the cache
+          before a line of product code is written.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 MARKETING -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">GO-TO-MARKET · 12</span>
+      <h2>The SEO flywheel is both the cost moat and the acquisition engine.</h2>
+      <span class="rule"></span>
+      <div class="body" style="flex-direction:column;align-items:stretch;justify-content:center">
+        <p class="lead" style="max-width:calc(var(--u)*84)">Every public figure briefed can power a public,
+          opt-out-able profile page — capturing high-intent long-tail searches ("who is X", "X research area",
+          "prepare for a meeting with X") at near-zero marginal cost, served from cache. Content compounds; CAC
+          trends to zero.</p>
+        <div class="cols2" style="margin-top:calc(var(--u)*1.6)">
+          <div>
+            <span class="kicker">Channels, in priority order</span>
+            <ul class="bul" style="margin-top:calc(var(--u)*1)">
+              <li><b>SEO / programmatic content</b> — profile pages + how-to guides. The compounding asset.</li>
+              <li><b>Conference presence</b> — SIGCSE, CSCW, CHI, ICSE, ASEE. Hook: "give us your next five meetings — we'll brief them free at the booth."</li>
+              <li><b>Research-office channel</b> — VPR, CTL, libraries, grant offices already buy tools <em>for</em> faculty. Shortest path to Department/site licenses.</li>
+            </ul>
+          </div>
+          <div>
+            <span class="kicker">&nbsp;</span>
+            <ul class="bul" style="margin-top:calc(var(--u)*1)">
+              <li><b>Academic social</b> — X/Bluesky/Mastodon, LinkedIn. The "name in → brief out" demo GIF is inherently shareable.</li>
+              <li><b>Viral loop</b> — every brief carries a subtle mark and share link; the recipient is a qualified prospect.</li>
+              <li><b>Partnerships</b> — OpenAlex/ORCID/Semantic Scholar for credibility and data; university procurement as the enterprise motion.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="note"><b>Positioning line:</b> "Brief yourself before the meeting. In two minutes, not two hours."</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 COMPETITION -->
+  <section class="slide">
+    <div class="stage">
+      <span class="marker">POSITIONING · 13</span>
+      <h2>The moat is the corpus and the data — not the model.</h2>
+      <span class="rule"></span>
+      <div class="body" style="flex-direction:column;align-items:stretch;justify-content:center">
+        <div class="tbl cx">
+          <div class="hd">Alternative</div><div class="hd">What it is</div><div class="hd">Why we win</div>
+          <div class="nm">DIY ChatGPT / Claude</div><div>Free-ish, capable</div><div>No artifact, no sources, 30–60 min of effort</div>
+          <div class="nm">Sales intelligence</div><div>Clay, Clearbit, ZoomInfo</div><div>Wrong vertical, expensive, no academic data</div>
+          <div class="nm">Academic profiles</div><div>Scholar, ResearchGate, OpenAlex</div><div>Raw data, not a brief; hours of reading</div>
+          <div class="nm">Meeting assistants</div><div>Otter, Fireflies, Granola</div><div>They record <em>after</em>; we prepare <em>before</em></div>
+          <div class="nm">A human research assistant</div><div>$22–35/hr, 2–4 hrs</div><div>$70–$1,400 and a day's lead time</div>
+        </div>
+        <p class="note" style="margin-top:calc(var(--u)*1.7);max-width:calc(var(--u)*86)">A competitor can copy the interface
+          tomorrow; they cannot copy the <b>cache corpus</b>, the <b>grant + CV data integrations</b>, or the
+          <b>SEO real estate</b>. Those compound — the LLM call does not.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 RISKS / ASK -->
+  <section class="slide dark">
+    <div class="stage">
+      <span class="marker">RISKS &amp; THE ASK · 14</span>
+      <h2>The plan is sound if we control three things: accuracy, legality, and free-tier cost.</h2>
+      <span class="rule"></span>
+      <div class="body" style="flex-direction:column;align-items:stretch;justify-content:center">
+        <div class="cols2">
+          <ul class="bul" style="color:#A9B1B5">
+            <li style="color:#A9B1B5"><b style="color:#F4F5F5">Accuracy</b> — source-link every claim, quality gate before charging, optional human-review tier.</li>
+            <li style="color:#A9B1B5"><b style="color:#F4F5F5">Privacy / legality</b> — prefer open APIs, honour robots.txt, professional info only, opt-out + noindex, takedown SLA; no personality or personal inference.</li>
+            <li style="color:#A9B1B5"><b style="color:#F4F5F5">Free-tier cost</b> — cap at 2/mo (≤$0.30/user exposure), per-user COGS meter, kill-switch.</li>
+          </ul>
+          <ul class="bul" style="color:#A9B1B5">
+            <li style="color:#A9B1B5"><b style="color:#F4F5F5">Model cost drift</b> — model-agnostic layer, aggressive cache, pinned cheap default.</li>
+            <li style="color:#A9B1B5"><b style="color:#F4F5F5">Quality → churn</b> — invest in the fact base, not the prose; let users pick the synthesis tier.</li>
+            <li style="color:#A9B1B5"><b style="color:#F4F5F5">Incumbent copies the surface</b> — speed to the corpus and the SEO pages.</li>
+          </ul>
+        </div>
+        <div class="close-note">
+          <b>The ask:</b> runway to Phase 2 — ~$150–250k for 12 months (founder + one engineer + tooling +
+          conference travel), or the equivalent as a university-partnered pilot. <b>Start concierge. Ship the
+          manual pipeline to 50 people before writing product code.</b>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="zone l" id="zl" aria-hidden="true"></div>
+<div class="zone r" id="zr" aria-hidden="true"></div>
+
+<div class="hud">
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div class="hudrow">
+    <span class="count"><b id="cur">01</b> / <span id="tot">14</span></span>
+    <div class="nav">
+      <button id="prev" title="Previous (←)">←</button>
+      <button id="next" title="Next (→)">→</button>
+    </div>
+    <span class="hint">N · NOTES</span>
+  </div>
+</div>
+
+<div id="notes" aria-live="polite"></div>
+
+<script>
+var NOTES = [
+ { p:["Open with the size of the prize and the one-sentence product: a name goes in, a meeting-ready brief comes out, for about 15 cents of compute.",
+      "State the thesis up front so the rest of the deck is legible: the compute cost is trivial, so the whole business hinges on pricing structure and abuse control.",
+      "Flag that the plan is grounded in Oct-2026 public pricing, and that model/API rates move — re-verify before committing."],
+   q:["Who is the first buyer you can actually get in a room with — an individual professor, or a research office?",
+      "Is the goal a standalone company, or a tool that supports the lab's broader agenda?"] },
+
+ { p:["Anchor the value in money and time, not 'convenience'.",
+      "The cold meeting is the pain; the expert hour is the unit of loss.",
+      "The DIY alternative is the real competitor today, and it is bad — 30-60 minutes, no sources, no grant data."],
+   q:["Do you recognise the cold-meeting problem in your own calendar?",
+      "Would you pay $9 to skip two hours of prep? Would your department?"] },
+
+ { p:["Keep this concrete — show the artifact, not the pipeline.",
+      "The differentiator is the talking points and the citations, not the profile facts (those are free online).",
+      "MVP scope: name in, brief out, sources, PDF, and a cache of every person."],
+   q:["What is the minimum artifact you'd actually use before a meeting?",
+      "Does the talking-points feature feel like the wedge, or the profile summary?"] },
+
+ { p:["Two tailwinds (cheap compute, free open data) and one gap (no incumbent).",
+      "OpenAlex/ORCID/Crossref + NSF/NIH award APIs mean the data is free — the value-add is synthesis.",
+      "The wedge is narrow on purpose: dominate academics first, then skin the same engine for other verticals."],
+   q:["Which expansion vertical is most adjacent to your own network?",
+      "Is there a data source in your field that a generic tool would miss?"] },
+
+ { p:["This is the heart of the plan. Walk the table, then the chart.",
+      "The headline: a brief costs 8 to 42 cents, and synthesis — not search or render — is the entire lever.",
+      "The 60x spread on synthesis is why the model tier is a product decision, not an infrastructure detail."],
+   q:["Does the 42-cent premium brief still clear any price you can charge? (It does, by a wide margin.)",
+      "Should the default be the standard tier, or should we let the user choose on every brief?"] },
+
+ { p:["The key reframing: because COGS is tiny, this is NOT a cost-recovery problem.",
+      "Trade-off A is payment friction — Stripe's $0.30 fixed fee destroys $1-2 price points.",
+      "Trade-off B is quality vs churn — the cheapest brief is the most expensive mistake.",
+      "Trade-off C is abuse — small per-brief cost times uncapped usage equals unbounded liability."],
+   q:["Are you comfortable making standard (15-cent) synthesis the default rather than the cheapest tier?",
+      "Do you agree the one-off floor should be about $5-9?"] },
+
+ { p:["The single most important operational rule in the business: never offer unlimited generation.",
+      "A $19 unlimited plan is fine at 20 briefs and catastrophic at 500.",
+      "A cap converts an unbounded liability into a bounded one — that is what makes margin predictable.",
+      "Price overage at a multiple of COGS so heavy users are profitable per unit."],
+   q:["Would you rather sell generous caps, or a slightly higher price with truly unlimited *fair-use* on a department plan?",
+      "What cap feels generous to you as a user — 20, 40, 60 briefs a month?"] },
+
+ { p:["The cache is the structural advantage, not the model.",
+      "First brief about a person: 15 cents. Every later brief about that same person: about half a cent.",
+      "That both drops blended COGS (0.16 to 0.07 at 60% hit rate) and makes the SEO profile pages free to serve.",
+      "A competitor can copy the UI tomorrow; they cannot copy the corpus."],
+   q:["How concentrated are the people you meet — do you expect a high repeat rate?",
+      "Should public profile pages be opt-in, or opt-out with an easy removal path?"] },
+
+ { p:["Land with Pro, expand with Department and site licenses.",
+      "Worst-case margins are all comfortably positive; typical usage is above 90%.",
+      "The institutional tier is where the business gets comfortable — high ACV, low support, budget exists.",
+      "Annual pricing pulls cash forward and reduces churn sensitivity."],
+   q:["Which tier would you personally buy first?",
+      "Is the department the real buyer, or is it the research office / library?"] },
+
+ { p:["Make break-even concrete so the plan feels like a business, not a wish.",
+      "About 250 Pro users, or 19 department plans, covers a $3k/mo run-rate.",
+      "One or two site licenses cover it alone — which is why the institutional motion is the priority.",
+      "Keep CAC low by leading with SEO and conferences, not paid ads."],
+   q:["What is a realistic first-year paying-user target from your network alone?",
+      "Would a single university pilot get you to break-even faster than self-serve?"] },
+
+ { p:["Emphasise Phase 0: run the pipeline by hand for real faculty before building anything.",
+      "It validates willingness-to-pay and seeds the cache corpus at the same time.",
+      "The stack is deliberately boring and cheap — Next.js, Postgres, a job queue, Stripe.",
+      "Cost controls must ship before the public launch, not after."],
+   q:["Are you willing to run 20 briefs by hand to validate demand?",
+      "Who are the first 10 names you would test the concierge version on?"] },
+
+ { p:["The flywheel: public profile pages capture long-tail search, served from cache at near-zero cost.",
+      "Those pages are simultaneously the cost moat and the acquisition engine — content compounds.",
+      "Conferences and the research-office channel are the fastest paths to real buyers.",
+      "Every shared brief is a viral loop — the recipient is a qualified prospect."],
+   q:["Which conferences would be worth a demo booth in the first year?",
+      "Would a public profile page about a colleague flatter them, or feel intrusive?"] },
+
+ { p:["Be honest that the model is not the moat — anyone can call the same API.",
+      "The durable advantages: the cache/corpus, the vertical data integrations, artifact quality, and SEO real estate.",
+      "The human RA comparison is the strongest value anchor — $70-$1,400 and a day versus $9 and two minutes."],
+   q:["What would stop a well-funded incumbent from copying this in six months?",
+      "Is the corpus defensible enough, or do we need a data partnership to lock it in?"] },
+
+ { p:["Close on the three things that must stay controlled: accuracy, legality, free-tier cost.",
+      "Then make the ask: runway to Phase 2, or a university-partnered pilot.",
+      "Repeat the operational recommendation: start concierge, ship manually before building.",
+      "End on the decision you want from this meeting."],
+   q:["Do you want to pursue this as a company, a lab spin-out, or a licensed tool?",
+      "What is the one next action you'll take this week?"] }
+];
+
+var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+var i = 0, notesOn = false;
+var fill = document.getElementById('fill'), cur = document.getElementById('cur'), tot = document.getElementById('tot');
+var notesEl = document.getElementById('notes');
+tot.textContent = String(slides.length).padStart(2,'0');
+
+function renderNotes(){
+  var n = NOTES[i] || {p:[],q:[]};
+  var html = '<h4>Slide ' + String(i+1).padStart(2,'0') + ' — speaker notes</h4>';
+  html += '<span class="lbl">Talking points</span><ul>' + (n.p||[]).map(function(x){return '<li>'+x+'</li>';}).join('') + '</ul>';
+  html += '<span class="lbl">Discussion</span><ul class="q">' + (n.q||[]).map(function(x){return '<li>'+x+'</li>';}).join('') + '</ul>';
+  notesEl.innerHTML = html;
+}
+function show(n){
+  i = Math.max(0, Math.min(slides.length-1, n));
+  slides.forEach(function(s,k){ s.classList.toggle('active', k===i); });
+  document.body.classList.toggle('on-dark', slides[i].classList.contains('dark'));
+  fill.style.width = ((i+1)/slides.length*100) + '%';
+  cur.textContent = String(i+1).padStart(2,'0');
+  renderNotes();
+}
+document.addEventListener('keydown', function(e){
+  var k = e.key;
+  if(k==='ArrowRight' || k===' ' || k==='PageDown'){ e.preventDefault(); show(i+1); }
+  else if(k==='ArrowLeft' || k==='PageUp'){ e.preventDefault(); show(i-1); }
+  else if(k==='Home'){ e.preventDefault(); show(0); }
+  else if(k==='End'){ e.preventDefault(); show(slides.length-1); }
+  else if(k==='n' || k==='N'){ notesOn = !notesOn; notesEl.classList.toggle('on', notesOn); }
+});
+document.getElementById('next').onclick = function(){ show(i+1); };
+document.getElementById('prev').onclick = function(){ show(i-1); };
+document.getElementById('zr').onclick = function(){ show(i+1); };
+document.getElementById('zl').onclick = function(){ show(i-1); };
+show(0);
+</script>
+</body>
+</html>
